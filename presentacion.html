@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f5ee">
+    <meta name="description"
+        content="Conoce LIBRO DE HUANCANO, un libro digital interactivo sobre la historia y las tradiciones de nuestra comunidad.">
+    <title>LIBRO DE HUANCANO | Libro digital</title>
+    <link rel="stylesheet" href="presentacion.css">
+</head>
+
+<body>
+    <main class="sitio">
+        <header class="encabezado">
+            <a class="marca" href="#inicio" aria-label="LIBRO DE HUANCANO, inicio">
+                <span class="marca-icono" aria-hidden="true">📖</span>
+                <span>LIBRO DE HUANCANO</span>
+            </a>
+        </header>
+
+        <section class="portada" id="huancano-distrito" aria-labelledby="titulo">
+            <div class="portada-libro" aria-hidden="true">
+                <span class="portada-emblema">📖</span>
+                <span class="portada-linea"></span>
+                <span class="portada-nombre">LIBRO DE<br>HUANCANO</span>
+                <span class="portada-subtitulo">Historia de nuestra comunidad</span>
+            </div>
+
+            <div class="portada-texto">
+                <p class="etiqueta">Nuestra historia, al alcance de todos</p>
+                <h1 id="titulo">LIBRO DE HUANCANO</h1>
+                <p class="descripcion">
+                    Un libro digital interactivo para descubrir la historia, las personas y las tradiciones
+                    de nuestra comunidad.
+                </p>
+
+                <a class="boton-descarga" id="botonDescarga" href="#descarga-pendiente">
+                    <span aria-hidden="true">📱</span>
+                    Descargar aplicación
+                </a>
+                <p class="nota-descarga" id="estadoDescarga" aria-live="polite">
+                    Próximamente disponible para descargar.
+                </p>
+
+                <a class="enlace-en-linea" href="index.html">
+                    🌐 Leer en línea
+                </a>
+            </div>
+        </section>
+
+        <section class="caracteristicas" aria-labelledby="tituloCaracteristicas">
+            <p class="etiqueta">Una experiencia para explorar y aprender</p>
+            <h2 id="tituloCaracteristicas">Un libro para llevar contigo</h2>
+            <ul class="lista-caracteristicas">
+                <li><span aria-hidden="true">📖</span><span><strong>Lectura digital</strong><small>Lee a tu ritmo desde el teléfono.</small></span></li>
+                <li><span aria-hidden="true">🔖</span><span><strong>Continuar leyendo</strong><small>Retoma fácilmente desde donde quedaste.</small></span></li>
+                <li><span aria-hidden="true">🖍️</span><span><strong>Resaltar partes importantes</strong><small>Guarda los fragmentos que quieras recordar.</small></span></li>
+                <li><span aria-hidden="true">📑</span><span><strong>Secciones de la comunidad</strong><small>Explora sus distintos temas e historias.</small></span></li>
+                <li><span aria-hidden="true">❓</span><span><strong>Preguntas para aprender</strong><small>Comprueba lo que has aprendido.</small></span></li>
+            </ul>
+        </section>
+
+        <section class="informacion" aria-labelledby="tituloInformacion">
+            <div class="informacion-icono" aria-hidden="true">🏡</div>
+            <div>
+                <p class="etiqueta">Conoce nuestras raíces</p>
+                <h2 id="tituloInformacion">¿Qué encontrarás?</h2>
+                <p>
+                    Un recorrido por la historia y el origen de Huancano, su población, costumbres,
+                    tradiciones, mitos, leyendas y otros aspectos importantes de nuestra comunidad.
+                </p>
+            </div>
+        </section>
+
+        <section class="compartir" aria-labelledby="tituloCompartir">
+            <p class="etiqueta">Comparte el libro con tu comunidad</p>
+            <h2 id="tituloCompartir">Encuéntranos como Huancano-distrito</h2>
+            <p class="texto-compartir">
+                Escanea este código QR con la cámara del teléfono para abrir la página oficial.
+            </p>
+            <div class="qr-contenedor" id="qrContenedor">
+                <img id="codigoQr" class="codigo-qr" alt="Código QR para abrir LIBRO DE HUANCANO" hidden>
+                <p id="estadoQr" class="estado-qr" aria-live="polite">
+                    El código QR estará disponible cuando la página se publique en una dirección web.
+                </p>
+            </div>
+            <label class="etiqueta-enlace" for="enlacePublico">Enlace para compartir</label>
+            <div class="enlace-compartible">
+                <input id="enlacePublico" type="url" readonly value="Disponible al publicar la página">
+                <button id="copiarEnlace" type="button" disabled>Copiar</button>
+            </div>
+            <p class="nota-qr">El código se genera usando la dirección pública de esta página.</p>
+        </section>
+
+        <footer class="pie">
+            <span aria-hidden="true">📖</span> LIBRO DE HUANCANO
+        </footer>
+    </main>
+
+    <div class="aviso" id="aviso" role="status" aria-live="polite"></div>
+    <script src="presentacion.js"></script>
+</body>
+
+</html>

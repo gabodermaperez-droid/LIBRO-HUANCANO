@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LIBRO DE HUANCANO</title>
+
+    <link rel="stylesheet" href="estilo.css">
+</head>
+
+<body>
+
+    <main class="libro">
+        <div class="acciones-lectura">
+            <button id="continuarLeyendo" class="marcador-lectura" type="button" onclick="continuarLeyendo()">
+                🔖 <span>Continuar leyendo</span>
+            </button>
+            <span id="estadoMarcador" class="estado-marcador" aria-live="polite">Aún no hay una lectura guardada</span>
+        </div>
+
+        <!-- PORTADA -->
+        <section id="portada" class="pantalla">
+
+            <h1>📖 Historia de mi Comunidad</h1>
+
+            <p>
+                Aprende e informate sobre todo de la gran comunidad de HUANCANO y sus anexos,
+                donde descubriras su educacion, arqueologia, agricultura, origen, aspectos arqueologicos y los mitos y
+                leyendas que el mismo tiempo aun no borra...
+            </p>
+
+            <button onclick="mostrarIndice()">
+                Comenzar
+            </button>
+
+        </section>
+
+
+        <!-- ÍNDICE -->
+        <section id="indice" class="pantalla">
+
+            <h2>📑 Índice</h2>
+
+            <button onclick="irASeccion(1)">
+                📜 Origen
+                <small>Páginas 1 - 15</small>
+            </button>
+
+            <button onclick="irASeccion(16)">
+                🏫 Educación
+                <small>Páginas 16 - 25</small>
+            </button>
+
+            <button onclick="irASeccion(26)">
+                🌱 Agricultura
+                <small>Páginas 26 - 40</small>
+            </button>
+
+            <button onclick="irASeccion(41)">
+                🏺 Aspectos arqueológicos
+                <small>Páginas 41 - 65</small>
+            </button>
+
+            <button onclick="irASeccion(66)">
+                🎭 Mitos, leyendas y tradiciones
+                <small>Páginas 66 - 90</small>
+            </button>
+
+        </section>
+
+
+        <!-- LIBRO -->
+        <section id="lectura" class="pantalla">
+
+            <div class="barra-superior">
+
+                <button onclick="mostrarIndice()">
+                    ← Índice
+                </button>
+
+                <span id="numeroPagina">
+                    Página 1
+                </span>
+
+            </div>
+
+
+            <article class="pagina">
+
+                <h2 id="tituloSeccion">
+                    📜 Origen
+                </h2>
+
+                <div id="contenido">
+
+                    <p>
+                        Aquí aparecerá el contenido
+                        de la página.
+                    </p>
+
+                </div>
+
+            </article>
+
+            <div id="herramientasSeleccion" class="herramientas-seleccion" hidden>
+                <button id="botonResaltar" class="boton-resaltar" type="button">
+                    🖍️ Resaltar
+                </button>
+                <button id="botonEliminarResaltados" class="boton-eliminar-resaltados" type="button">
+                    🧽 Eliminar resaltado
+                </button>
+            </div>
+
+            <div class="navegacion">
+
+                <button onclick="paginaAnterior()">
+                    ← Anterior
+                </button>
+
+                <button onclick="paginaSiguiente()">
+                    Siguiente →
+                </button>
+
+            </div>
+
+        </section>
+
+        <div id="estadoAplicacion" class="estado-aplicacion" role="status" aria-live="polite"></div>
+
+    </main>
+
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
