@@ -2013,6 +2013,7 @@ function actualizarHerramientaSeleccion() {
 
 // Mostrar portada
 function mostrarPortada() {
+    salirDeActividades();
     document.getElementById("portada").classList.add("activa");
     document.getElementById("indice").classList.remove("activa");
     document.getElementById("lectura").classList.remove("activa");
@@ -2022,6 +2023,7 @@ function mostrarPortada() {
 
 function mostrarIndice() {
 
+    salirDeActividades();
     document.getElementById("portada").classList.remove("activa");
     document.getElementById("lectura").classList.remove("activa");
 
@@ -2032,6 +2034,7 @@ function mostrarIndice() {
 // Ir a una sección
 function irASeccion(pagina) {
 
+    salirDeActividades();
     const seccion = SECCIONES.find((item) => item.ancla === pagina);
     paginaActual = seccion ? PAGINAS_POR_SECCION[seccion.clave].inicio : pagina;
 
@@ -2044,9 +2047,47 @@ function irASeccion(pagina) {
     actualizarPagina();
 }
 
+function salirDeActividades() {
+    document.body.classList.remove("modo-actividades");
+    const pantallaActividades = document.getElementById("actividades");
+    if (pantallaActividades) {
+        pantallaActividades.classList.remove("activa");
+    }
+}
+
+function continuarLuegoDeActividades() {
+    const indiceSeccion = SECCIONES.findIndex((seccion) => {
+        const rango = PAGINAS_POR_SECCION[seccion.clave];
+        return rango && paginaActual >= rango.inicio && paginaActual <= rango.fin;
+    });
+    const siguienteSeccion = SECCIONES[indiceSeccion + 1];
+
+    if (siguienteSeccion) {
+        irASeccion(siguienteSeccion.ancla);
+        return;
+    }
+
+    mostrarIndice();
+}
+
 
 // Página siguiente
 function paginaSiguiente() {
+
+    const seccionActual = SECCIONES.find((seccion) => {
+        const rango = PAGINAS_POR_SECCION[seccion.clave];
+        return rango && paginaActual >= rango.inicio && paginaActual <= rango.fin;
+    });
+    const rangoSeccion = seccionActual && PAGINAS_POR_SECCION[seccionActual.clave];
+
+    if (rangoSeccion && paginaActual === rangoSeccion.fin) {
+        if (typeof window.abrirHojaActividades === "function") {
+            window.abrirHojaActividades(seccionActual.clave);
+        } else {
+            mostrarAviso("No se pudieron cargar las actividades de esta sección.");
+        }
+        return;
+    }
 
     if (paginaActual < PAGINA_MAXIMA) {
 

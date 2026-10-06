@@ -8,6 +8,7 @@
     <title>LIBRO DE HUANCANO</title>
 
     <link rel="stylesheet" href="estilo.css">
+    <link rel="stylesheet" href="actividades.css">
 </head>
 
 <body>
@@ -127,12 +128,25 @@
 
         </section>
 
+        <section id="actividades" class="pantalla hoja-actividades" aria-labelledby="tituloActividades">
+            <div class="hoja-actividades-contenedor">
+                <header class="encabezado-actividades">
+                    <span class="sello-actividades">HOJA DE ACTIVIDADES</span>
+                    <button id="volverLecturaActividades" class="boton-volver-lectura" type="button">
+                        ← Volver a la lectura
+                    </button>
+                </header>
+                <div id="contenidoActividades"></div>
+            </div>
+        </section>
+
         <div id="estadoAplicacion" class="estado-aplicacion" role="status" aria-live="polite"></div>
 
     </main>
 
 
     <script src="app.js"></script>
+    <script src="actividades.js"></script>
 
 </body>
 
