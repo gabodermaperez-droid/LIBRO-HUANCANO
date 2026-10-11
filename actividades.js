@@ -489,8 +489,10 @@ const BANCO_ACTIVIDADES = {
             mostrarAviso("No están disponibles las actividades de esta sección.");
             return;
         }
-        seccionActual = clave;
-        iniciarDeNuevo();
+        if (seccionActual !== clave) {
+            seccionActual = clave;
+            iniciarDeNuevo();
+        }
         document.getElementById("portada").classList.remove("activa");
         document.getElementById("indice").classList.remove("activa");
         document.getElementById("lectura").classList.remove("activa");

@@ -2090,70 +2090,70 @@ function paginaSiguiente() {
     }
 
     if (paginaActual < PAGINA_MAXIMA) {
-
         paginaActual++;
-
         guardarPaginaActual();
         actualizarPagina();
     }
 }
-
 
 // Página anterior
 function paginaAnterior() {
-
     if (paginaActual > 1) {
-
         paginaActual--;
-
         guardarPaginaActual();
         actualizarPagina();
     }
 }
 
-
 // Actualizar el contenido
 function actualizarPagina() {
-    document.getElementById("herramientasSeleccion").hidden = true;
+    const herramientas = document.getElementById("herramientasSeleccion");
+    if (herramientas) {
+        herramientas.hidden = true;
+    }
     window.getSelection()?.removeAllRanges();
 
-    document.getElementById("numeroPagina").textContent =
-        "Página " + paginaActual;
+    const numero = document.getElementById("numeroPagina");
+    if (numero) {
+        numero.textContent = "Página " + paginaActual;
+    }
 
     const pagina = paginas[paginaActual];
+    const titulo = document.getElementById("tituloSeccion");
+    const contenidoElemento = document.getElementById("contenido");
 
-    if (pagina) {
-        document.getElementById("tituloSeccion").textContent = pagina.titulo;
-        document.getElementById("contenido").innerHTML = pagina.contenido;
-        aplicarResaltados(paginaActual);
-        actualizarHerramientaSeleccion();
+    if (!titulo || !contenidoElemento) {
+        console.error("No se pudo mostrar la página: faltan los elementos de título o contenido.");
         return;
     }
 
-    const seccion = SECCIONES.find((item) => {
-        const rango = PAGINAS_POR_SECCION[item.clave];
-        return rango && paginaActual >= rango.inicio && paginaActual <= rango.fin;
-    });
-    const titulo = seccion ? seccion.titulo : "";
-    const contenido = seccion && seccion.clave === "mitos"
-        ? "<p>[Escribe aquí el mito, la leyenda o la tradición de la página " + paginaActual + ".]</p>"
-        : "<p>Contenido de la página " + paginaActual + ".</p>";
+    if (pagina) {
+        titulo.textContent = pagina.titulo;
+        contenidoElemento.innerHTML = pagina.contenido;
+    } else {
+        const seccion = SECCIONES.find((item) => {
+            const rango = PAGINAS_POR_SECCION[item.clave];
+            return rango && paginaActual >= rango.inicio && paginaActual <= rango.fin;
+        });
+        titulo.textContent = seccion ? seccion.titulo : "";
+        contenidoElemento.innerHTML = seccion && seccion.clave === "mitos"
+            ? "<p>[Escribe aquí el mito, la leyenda o la tradición de la página " + paginaActual + ".]</p>"
+            : "<p>Contenido de la página " + paginaActual + ".</p>";
+    }
 
-    document.getElementById("tituloSeccion").textContent = titulo;
-    document.getElementById("contenido").innerHTML = contenido;
     aplicarResaltados(paginaActual);
     actualizarHerramientaSeleccion();
 }
 
 
-    window.addEventListener('DOMContentLoaded', function () {
-        document.body.classList.add('js-ready');
-        actualizarIndiceSecciones();
-        actualizarEstadoMarcador();
-        document.getElementById("botonResaltar").addEventListener("click", resaltarTextoSeleccionado);
-        document.getElementById("botonEliminarResaltados").addEventListener("click", eliminarResaltadosPagina);
-        document.addEventListener("selectionchange", actualizarHerramientaSeleccion);
-        paginaActual = 1;
-        mostrarPortada();
-        actualizarPagina();
-    });
+window.addEventListener("DOMContentLoaded", function () {
+    document.body.classList.add("js-ready");
+    actualizarIndiceSecciones();
+    actualizarEstadoMarcador();
+    document.getElementById("botonResaltar")?.addEventListener("click", resaltarTextoSeleccionado);
+    document.getElementById("botonEliminarResaltados")?.addEventListener("click", eliminarResaltadosPagina);
+    document.addEventListener("selectionchange", actualizarHerramientaSeleccion);
+    paginaActual = 1;
+    mostrarPortada();
+    actualizarPagina();
+});
