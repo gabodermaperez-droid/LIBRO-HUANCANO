@@ -63,7 +63,7 @@
             ? "Hoja de actividades"
             : datos ? datos.titulo : "";
         contenido.innerHTML = paginaVacia && typeof window.abrirHojaActividades === "function"
-            ? "<p>Arrastra la hoja para continuar con las actividades de esta sección.</p>"
+            ? "<p>Usa «Siguiente» para abrir las actividades de esta sección.</p>"
             : datos ? datos.contenido : "";
 
         if (pageNumber) {
@@ -74,13 +74,24 @@
     }
 
     function actualizarVista() {
+        const seccion = seccionDe(paginaActual);
+        const rango = seccion && PAGINAS_POR_SECCION[seccion.clave];
+        const previaActividades = Boolean(rango && paginaActual === rango.fin);
         area.classList.toggle("spread-enabled", wideScreen.matches);
+        area.classList.toggle("pagina-previa-actividades", previaActividades);
+        document.getElementById("lectura").classList.toggle("previsualiza-actividades", previaActividades);
+        const indicacion = area.querySelector(".indicacion-arrastre");
+        if (indicacion) {
+            indicacion.textContent = previaActividades
+                ? "Usa «Siguiente» para abrir las actividades de esta sección"
+                : "Arrastra una esquina o el borde de la hoja para pasarla";
+        }
         actualizarPaginaDerecha();
     }
 
     window.actualizarPagina = function (...argumentos) {
         actualizarPaginaOriginal.apply(this, argumentos);
-        actualizarPaginaDerecha();
+        actualizarVista();
     };
 
     function ejecutarNavegacion(direccion) {
@@ -88,11 +99,11 @@
             const seccion = seccionDe(paginaActual);
             const rango = seccion && PAGINAS_POR_SECCION[seccion.clave];
 
-            if (paginaActual >= PAGINA_MAXIMA) {
-                return false;
-            }
             if (rango && paginaActual === rango.fin) {
                 paginaSiguienteOriginal.call(window);
+                return false;
+            }
+            if (paginaActual >= PAGINA_MAXIMA) {
                 return false;
             }
 
@@ -262,9 +273,8 @@
             return;
         }
         if (!puedeGirar(direccion)) {
-            if (direccion === "forward" && paginaActual < PAGINA_MAXIMA) {
+            if (direccion === "forward") {
                 ejecutarNavegacion(direccion);
-                actualizarVista();
             }
             return;
         }

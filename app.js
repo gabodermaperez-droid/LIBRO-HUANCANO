@@ -1531,28 +1531,56 @@ function obtenerTextoDeBloque(nodo) {
     return copia.textContent.trim();
 }
 
-function envolverTextoSeccion(texto) {
-    const maxCaracteresPorLinea = 25;
+function obtenerMetricasPagina() {
+    const anchoViewport = window.innerWidth || document.documentElement.clientWidth;
+    const altoViewport = window.innerHeight || document.documentElement.clientHeight;
+    const doblePagina = anchoViewport >= 900;
+    const anchoArea = Math.min(1240, anchoViewport - 32);
+    const anchoPagina = doblePagina ? (anchoArea - 20) / 2 : anchoArea;
+    const paddingLateral = doblePagina
+        ? Math.max(22, Math.min(42, anchoViewport * 0.03))
+        : anchoViewport <= 599
+            ? 20
+            : Math.max(22, Math.min(42, anchoViewport * 0.05));
+    const anchoTexto = Math.max(180, anchoPagina - paddingLateral * 2);
+    const tamanoFuente = doblePagina
+        ? Math.max(16, Math.min(18, anchoViewport * 0.0145))
+        : 18;
+    const altoPagina = altoViewport * (doblePagina ? 0.70 : anchoViewport <= 599 ? 0.68 : 0.62);
+    const paddingVertical = doblePagina
+        ? Math.max(22, Math.min(42, anchoViewport * 0.03))
+        : anchoViewport <= 599
+            ? 24
+            : Math.max(22, Math.min(42, anchoViewport * 0.05));
+    const altoTitulo = 21 * 1.35 + 24;
+    const altoLinea = tamanoFuente * (doblePagina ? 1.72 : 1.75);
+    const lineasDisponibles = Math.max(
+        8,
+        Math.floor((altoPagina - paddingVertical * 2 - altoTitulo - 18) / altoLinea)
+    );
+    const lienzo = document.createElement("canvas");
+    const contexto = lienzo.getContext("2d");
+    if (!contexto) {
+        throw new Error("No se pudo medir el texto para distribuir las páginas.");
+    }
+    contexto.font = `${tamanoFuente}px Georgia, "Times New Roman", serif`;
+
+    return { anchoTexto, lineasDisponibles, contexto };
+}
+
+function envolverTextoSeccion(texto, metricas) {
     const lineas = [];
     let linea = "";
 
     texto.split("\n").forEach((fragmento) => {
         fragmento.trim().split(/\s+/).filter(Boolean).forEach((palabra) => {
-            if (linea && linea.length + palabra.length + 1 > maxCaracteresPorLinea) {
+            const candidata = linea ? `${linea} ${palabra}` : palabra;
+            if (linea && metricas.contexto.measureText(candidata).width > metricas.anchoTexto) {
                 lineas.push(linea);
-                linea = "";
+                linea = palabra;
+            } else {
+                linea = candidata;
             }
-
-            while (palabra.length > maxCaracteresPorLinea) {
-                if (linea) {
-                    lineas.push(linea);
-                    linea = "";
-                }
-                lineas.push(palabra.slice(0, maxCaracteresPorLinea));
-                palabra = palabra.slice(maxCaracteresPorLinea);
-            }
-
-            linea = linea ? linea + " " + palabra : palabra;
         });
 
         if (linea) {
@@ -1579,8 +1607,12 @@ function obtenerSeccion(pagina) {
 
 function crearPaginasConTexto(seccion, paginasOriginales) {
     const paginasNuevas = [];
+    const metricas = obtenerMetricasPagina();
+    const maxLineasPorPagina = metricas.lineasDisponibles;
     let bloquesPagina = [];
     let lineasPagina = 0;
+    let encabezadoPendiente = "";
+    let textoEncabezadoPendiente = "";
 
     function guardarPagina() {
         if (!bloquesPagina.length) {
@@ -1595,34 +1627,42 @@ function crearPaginasConTexto(seccion, paginasOriginales) {
     }
 
     function agregarBloqueTexto(html, nodo) {
-        const lineas = envolverTextoSeccion(obtenerTextoDeBloque(nodo));
+        const textoBloque = obtenerTextoDeBloque(nodo);
+        const textoCompleto = [textoEncabezadoPendiente, textoBloque].filter(Boolean).join("\n");
+        const htmlCompleto = encabezadoPendiente + html;
+        const lineas = envolverTextoSeccion(textoCompleto, metricas);
         if (!lineas.length) {
             return;
         }
 
-        if (lineas.length > 15) {
+        const costoBloque = lineas.length + 1;
+        if (lineas.length > maxLineasPorPagina) {
             guardarPagina();
-            for (let inicio = 0; inicio < lineas.length; inicio += 15) {
+            for (let inicio = 0; inicio < lineas.length; inicio += maxLineasPorPagina) {
                 const textoHtml = lineas
-                    .slice(inicio, inicio + 15)
+                    .slice(inicio, inicio + maxLineasPorPagina)
                     .map((linea) => linea
                         .replace(/&/g, "&amp;")
                         .replace(/</g, "&lt;")
                         .replace(/>/g, "&gt;"))
-                    .join("<br>");
+                    .join(" ");
                 paginasNuevas.push({
                     titulo: seccion.titulo,
                     contenido: `<p class="contenido-lineas">${textoHtml}</p>`
                 });
             }
+            encabezadoPendiente = "";
+            textoEncabezadoPendiente = "";
             return;
         }
 
-        if (lineasPagina + lineas.length > 15) {
+        if (lineasPagina + costoBloque > maxLineasPorPagina) {
             guardarPagina();
         }
-        bloquesPagina.push(html);
-        lineasPagina += lineas.length;
+        bloquesPagina.push(htmlCompleto);
+        lineasPagina += costoBloque;
+        encabezadoPendiente = "";
+        textoEncabezadoPendiente = "";
     }
 
     paginasOriginales.forEach((pagina) => {
@@ -1633,6 +1673,13 @@ function crearPaginasConTexto(seccion, paginasOriginales) {
             }
 
             if (nodo.nodeType === Node.ELEMENT_NODE && esBloqueDeFormato(nodo)) {
+                if (encabezadoPendiente) {
+                    const htmlEncabezado = encabezadoPendiente;
+                    const documentoEncabezado = new DOMParser().parseFromString(htmlEncabezado, "text/html");
+                    encabezadoPendiente = "";
+                    textoEncabezadoPendiente = "";
+                    agregarBloqueTexto(htmlEncabezado, documentoEncabezado.body.firstElementChild);
+                }
                 guardarPagina();
                 paginasNuevas.push({
                     titulo: seccion.titulo,
@@ -1644,6 +1691,21 @@ function crearPaginasConTexto(seccion, paginasOriginales) {
             }
 
             if (nodo.nodeType === Node.ELEMENT_NODE) {
+                const esEncabezadoBreve = nodo.matches("p") &&
+                    nodo.querySelector("strong") &&
+                    nodo.textContent.trim().length <= 90 &&
+                    Array.from(nodo.childNodes).every((hijo) =>
+                        hijo.nodeType === Node.TEXT_NODE && !hijo.textContent.trim() ||
+                        hijo.nodeType === Node.ELEMENT_NODE &&
+                            (hijo.matches("strong, b, br") || hijo.matches("strong, b") &&
+                                Array.from(hijo.childNodes).every((nieto) =>
+                                    nieto.nodeType === Node.TEXT_NODE || nieto.matches("br")))
+                    );
+                if (esEncabezadoBreve && !encabezadoPendiente) {
+                    encabezadoPendiente = nodo.outerHTML;
+                    textoEncabezadoPendiente = obtenerTextoDeBloque(nodo);
+                    return;
+                }
                 agregarBloqueTexto(nodo.outerHTML, nodo);
                 return;
             }
@@ -1656,6 +1718,13 @@ function crearPaginasConTexto(seccion, paginasOriginales) {
             }
         });
     });
+    if (encabezadoPendiente) {
+        const htmlEncabezado = encabezadoPendiente;
+        const documentoEncabezado = new DOMParser().parseFromString(htmlEncabezado, "text/html");
+        encabezadoPendiente = "";
+        textoEncabezadoPendiente = "";
+        agregarBloqueTexto(htmlEncabezado, documentoEncabezado.body.firstElementChild);
+    }
     guardarPagina();
 
     while (paginasNuevas.length < seccion.minimo) {
@@ -1732,7 +1801,46 @@ function mostrarAviso(mensaje) {
 
 function obtenerPaginaGuardada() {
     try {
-        const paginaGuardada = Number(localStorage.getItem(CLAVE_ULTIMA_PAGINA));
+        const valorGuardado = localStorage.getItem(CLAVE_ULTIMA_PAGINA);
+        if (!valorGuardado) {
+            return null;
+        }
+
+        if (valorGuardado.trim().startsWith("{")) {
+            const marcador = JSON.parse(valorGuardado);
+            const seccion = SECCIONES.find((item) => item.clave === marcador.seccion);
+            const rango = seccion && PAGINAS_POR_SECCION[seccion.clave];
+            if (!rango || !Number.isInteger(marcador.desplazamiento)) {
+                return null;
+            }
+
+            const ancla = typeof marcador.ancla === "string"
+                ? marcador.ancla.trim().toLocaleLowerCase("es")
+                : "";
+            if (ancla) {
+                const textosDeBusqueda = [80, 48, 24, 12]
+                    .map((largo) => ancla.slice(0, largo))
+                    .filter((texto) => texto.length > 0);
+                for (const texto of textosDeBusqueda) {
+                    const paginaCoincidente = Object.keys(paginas)
+                        .map(Number)
+                        .find((numero) => numero >= rango.inicio && numero <= rango.fin &&
+                            obtenerTextoDeBloque(new DOMParser()
+                                .parseFromString(paginas[numero].contenido, "text/html").body)
+                                .replace(/\s+/g, " ")
+                                .trim()
+                                .toLocaleLowerCase("es")
+                                .includes(texto));
+                    if (paginaCoincidente) {
+                        return paginaCoincidente;
+                    }
+                }
+            }
+
+            return Math.min(rango.fin, rango.inicio + Math.max(0, marcador.desplazamiento));
+        }
+
+        const paginaGuardada = Number(valorGuardado);
         return Number.isInteger(paginaGuardada) &&
             paginaGuardada >= 1 &&
             paginaGuardada <= PAGINA_MAXIMA
@@ -1759,8 +1867,38 @@ function actualizarEstadoMarcador() {
 
 function guardarPaginaActual() {
     try {
-        localStorage.setItem(CLAVE_ULTIMA_PAGINA, String(paginaActual));
-        actualizarEstadoMarcador();
+        const seccion = SECCIONES.find((item) => {
+            const rango = PAGINAS_POR_SECCION[item.clave];
+            return rango && paginaActual >= rango.inicio && paginaActual <= rango.fin;
+        });
+        if (!seccion) {
+            localStorage.setItem(CLAVE_ULTIMA_PAGINA, String(paginaActual));
+            const estado = document.getElementById("estadoMarcador");
+            if (estado) {
+                estado.textContent = `Página ${paginaActual} guardada`;
+            }
+            return;
+        }
+
+        const documento = new DOMParser().parseFromString(
+            paginas[paginaActual]?.contenido || "",
+            "text/html"
+        );
+        const ancla = obtenerTextoDeBloque(documento.body)
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 80)
+            .toLocaleLowerCase("es");
+        const rango = PAGINAS_POR_SECCION[seccion.clave];
+        localStorage.setItem(CLAVE_ULTIMA_PAGINA, JSON.stringify({
+            seccion: seccion.clave,
+            desplazamiento: paginaActual - rango.inicio,
+            ancla
+        }));
+        const estado = document.getElementById("estadoMarcador");
+        if (estado) {
+            estado.textContent = `Página ${paginaActual} guardada`;
+        }
     } catch (error) {
         console.error("No se pudo guardar la última página leída.", error);
         mostrarAviso("No se pudo guardar la página. Revisa el almacenamiento del navegador.");
@@ -1779,6 +1917,7 @@ function continuarLeyendo() {
     document.getElementById("portada").classList.remove("activa");
     document.getElementById("indice").classList.remove("activa");
     document.getElementById("lectura").classList.add("activa");
+    guardarPaginaActual();
     actualizarPagina();
 }
 

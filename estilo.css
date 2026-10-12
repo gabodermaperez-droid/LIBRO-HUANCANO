@@ -696,6 +696,9 @@ body {
 .spread-enabled .book-spread .pagina {
     min-width: 0;
     min-height: 70vh;
+    min-height: 70dvh;
+    height: 70vh;
+    height: 70dvh;
     margin: 12px 0 20px;
     padding: clamp(22px, 3vw, 42px);
     border-radius: 4px 2px 2px 4px;
@@ -852,6 +855,17 @@ body {
     touch-action: pan-y pinch-zoom;
 }
 
+.pagina {
+    min-height: 62vh;
+    min-height: 62dvh;
+    height: 62vh;
+    height: 62dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+
 .navegacion {
     position: absolute;
     width: 1px;
@@ -865,6 +879,17 @@ body {
 }
 
 .navegacion:focus-within {
+    position: static;
+    width: min(100%, 420px);
+    height: auto;
+    margin: 8px auto 0;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
+}
+
+#lectura.previsualiza-actividades .navegacion {
     position: static;
     width: min(100%, 420px);
     height: auto;
@@ -905,6 +930,9 @@ body {
 
     .pagina {
         min-height: 68vh;
+        min-height: 68dvh;
+        height: 68vh;
+        height: 68dvh;
         padding: 24px 20px;
         border-radius: 3px 7px 6px 3px;
     }
